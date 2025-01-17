@@ -33,12 +33,12 @@ jobs:
             if (runs.data.workflow_runs.length === 0) {
               throw new Error('No successful runs found for on-pr-open workflow');
             }
+            console.log(`Last successful run: ${runs.data.workflow_runs[0].id}`);
             return runs.data.workflow_runs[0].id;
 
       - name: Download last dist artifact
         uses: actions/download-artifact@v4
         with:
-          workflow: on-pr-open.yml
           run-id: ${{ steps.find-run.outputs.run_id }}
           name: dist
           path: dist
