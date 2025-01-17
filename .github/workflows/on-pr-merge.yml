@@ -1,5 +1,5 @@
 name: On PR Merge
-run-name: on-pr-merge
+run-name: on-pr-merge-${{ github.head_ref }}
 
 # Runs on every change in a pull request, even draft requests
 on:
@@ -18,30 +18,96 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - id: find-run
-        uses: actions/github-script@v6
+      - name: Dump all context
+        shell: bash
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          JOB_CONTEXT: ${{ toJson(job) }}
+          # MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+          # STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: |
+          echo -e "\033[33;1;4mDump environment vars\033[0m"
+          echo -e "$(env|sort)\n"
+
+          echo -e "\033[33;1;4mDump github context\033[0m"
+          echo -e "$GITHUB_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump job context\033[0m"
+          echo -e "$JOB_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump steps context\033[0m"
+          echo -e "$STEPS_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump matrix context\033[0m"
+          echo -e "$MATRIX_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump runner context\033[0m"
+          echo -e "$RUNNER_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump strategy context\033[0m"
+          echo -e "$STRATEGY_CONTEXT\n"
+        
+      - uses: actions/github-script@v7
+        name: Dump context
         with:
           script: |
+            console.log(JSON.stringify(context))
+
+      - name: Download manually
+        uses: actions/github-script@v7
+        continue-on-error: true
+        env:
+          WORKFLOW_ID: "on-pr-change.yml"
+          ARTIFACT_NAME: "dist"
+        with:
+          script: |
+            const workflowId = process.env.WORKFLOW_ID
+            const artifactName = process.env.ARTIFACT_NAME
+            console.log({workflowId, artifactName})
+            
             const runs = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'on-pr-open.yml',
-              branch: context.payload.pull_request.head.ref,
+              workflow_id: workflowId,
+              branch: context.ref.replace("refs/heads/", ""),
               status: 'success',
               per_page: 1
             });
             if (runs.data.workflow_runs.length === 0) {
-              throw new Error('No successful runs found for on-pr-open workflow');
+              throw new Error(`No successful runs found for ${workflowId} workflow`);
             }
-            console.log(`Last successful run: ${runs.data.workflow_runs[0].id}`);
-            return runs.data.workflow_runs[0].id;
 
-      - name: Download last dist artifact
-        uses: actions/download-artifact@v4
-        with:
-          run-id: ${{ steps.find-run.outputs.run_id }}
-          name: dist
-          path: ./dist
+            console.log(`Last successful run id: ${runs.data.workflow_runs[0].id}`);
+            const runId = runs.data.workflow_runs[0].id;
+            
+            let data = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+            }
+            console.log({data})
+            const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts(data);
+
+            console.log(JSON.stringify(allArtifacts))
+
+            const artifact = allArtifacts.data.artifacts.find((x) => x.name === artifactName)
+
+            data = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: artifact.id,
+              archive_format: 'zip',
+            }
+            console.log({data})
+            const download = await github.rest.actions.downloadArtifact(data);
+            
+            const fs = require('fs');
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/${artifactName}.zip`, Buffer.from(download.data));
+
+      - name: Extract artifact
+        run: 7z x dist.zip -o./dist
 
       - name: List content
         run: ls -al ./
