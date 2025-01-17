@@ -77,22 +77,26 @@ jobs:
           OTHER_WORKFLOW_RUN_ID: ${{ steps.find-run.outputs.run_id }}
         with:
           script: |
-            const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: process.env.OTHER_WORKFLOW_RUN_ID,
-            });
+            let data = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: process.env.OTHER_WORKFLOW_RUN_ID,
+            }
+            console.log({data})
+            const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts(data);
 
             console.log(JSON.stringify(allArtifacts))
 
             const artifact = allArtifacts.data.artifacts.find((x) => x.name === "dist")
 
-            const download = await github.rest.actions.downloadArtifact({
+            let data = {
               owner: context.repo.owner,
               repo: context.repo.repo,
               artifact_id: artifact.id,
               archive_format: 'zip',
-            });
+            }
+            console.log({data})
+            const download = await github.rest.actions.downloadArtifact(data);
             
             let fs = require('fs');
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/dist.zip`, Buffer.from(download.data));
