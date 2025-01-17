@@ -61,8 +61,8 @@ jobs:
           script: |
             const workflowId = process.env.WORKFLOW_ID
             const artifactName = process.env.ARTIFACT_NAME
-
-            console.log({env: JSON.stringify(process.env), workflowId, artifactName})
+            console.log({workflowId, artifactName})
+            
             const runs = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,

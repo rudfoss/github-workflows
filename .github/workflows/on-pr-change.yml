@@ -1,5 +1,5 @@
 name: On PR Change
-run-name: on-pr-change
+run-name: on-pr-change-${{ github.ref_name }}
 
 # Runs on every change in a pull request, even draft requests
 on:
