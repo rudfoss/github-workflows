@@ -103,7 +103,7 @@ jobs:
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/${artifactName}.zip`, Buffer.from(download.data));
 
       - name: Extract artifact
-        run: 7z x dist.zip
+        run: 7z x dist.zip -oc ./dist
 
       - name: List content
         run: ls -al ./
