@@ -51,56 +51,56 @@ jobs:
           script: |
             console.log(JSON.stringify(context))
 
-      - name: Download manually
-        uses: actions/github-script@v7
-        continue-on-error: true
-        env:
-          WORKFLOW_ID: "on-pr-change.yml"
-          ARTIFACT_NAME: "dist"
-        with:
-          script: |
-            const workflowId = process.env.WORKFLOW_ID
-            const artifactName = process.env.ARTIFACT_NAME
-            console.log({workflowId, artifactName})
-
-            const runs = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflowId,
-              branch: context.ref.replace("refs/heads/", ""),
-              status: 'success',
-              per_page: 1
-            });
-            if (runs.data.workflow_runs.length === 0) {
-              throw new Error(`No successful runs found for ${workflowId} workflow`);
-            }
-
-            console.log(`Last successful run id: ${runs.data.workflow_runs[0].id}`);
-            const runId = runs.data.workflow_runs[0].id;
-            
-            let data = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: runId,
-            }
-            console.log({data})
-            const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts(data);
-
-            console.log(JSON.stringify(allArtifacts))
-
-            const artifact = allArtifacts.data.artifacts.find((x) => x.name === artifactName)
-
-            data = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: artifact.id,
-              archive_format: 'zip',
-            }
-            console.log({data})
-            const download = await github.rest.actions.downloadArtifact(data);
-            
-            const fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/${artifactName}.zip`, Buffer.from(download.data));
+            - name: Download manually
+            uses: actions/github-script@v7
+            env:
+              WORKFLOW_ID: "on-pr-change.yml"
+              ARTIFACT_NAME: "dist"
+            with:
+              script: |
+                const workflowId = process.env.WORKFLOW_ID
+                const artifactName = process.env.ARTIFACT_NAME
+                const branch = context.head_ref
+                console.log({workflowId, artifactName, branch})
+                
+                const runs = await github.rest.actions.listWorkflowRuns({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: workflowId,
+                  branch,
+                  status: 'success',
+                  per_page: 1
+                });
+                if (runs.data.workflow_runs.length === 0) {
+                  throw new Error(`No successful runs found for ${workflowId} workflow`);
+                }
+    
+                console.log(`Last successful run id: ${runs.data.workflow_runs[0].id}`);
+                const runId = runs.data.workflow_runs[0].id;
+                
+                let data = {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: runId,
+                }
+                console.log({data})
+                const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts(data);
+    
+                console.log(JSON.stringify(allArtifacts))
+    
+                const artifact = allArtifacts.data.artifacts.find((x) => x.name === artifactName)
+    
+                data = {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                  archive_format: 'zip',
+                }
+                console.log({data})
+                const download = await github.rest.actions.downloadArtifact(data);
+                
+                const fs = require('fs');
+                fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/${artifactName}.zip`, Buffer.from(download.data));
 
       - name: Extract artifact
         run: 7z x dist.zip -o./dist
