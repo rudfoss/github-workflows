@@ -1,0 +1,31 @@
+name: On PR Merge
+run-name: on-pr-merge
+
+# Runs on every change in a pull request, even draft requests
+on:
+  pull_request:
+    types: [closed]
+    branches: # Trigger only if the PR targets main (remove these two lines to trigger on all PRs)
+      - main
+
+# Cancel any existing runs if new code is pushed to avoid multiple simultaneous instances
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download last dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: List content
+        runs: ls -al dist
+      
+      - name: Dump ping file
+        runs: cat dist/pingfile.txt
