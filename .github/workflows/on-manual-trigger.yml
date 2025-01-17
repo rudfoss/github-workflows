@@ -14,42 +14,42 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Dump all context
-        shell: bash
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-          JOB_CONTEXT: ${{ toJson(job) }}
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        run: |
-          echo -e "\033[33;1;4mDump environment vars\033[0m"
-          echo -e "$(env|sort)\n"
+      # - name: Dump all context
+      #   shell: bash
+      #   env:
+      #     GITHUB_CONTEXT: ${{ toJson(github) }}
+      #     JOB_CONTEXT: ${{ toJson(job) }}
+      #     MATRIX_CONTEXT: ${{ toJson(matrix) }}
+      #     RUNNER_CONTEXT: ${{ toJson(runner) }}
+      #     STEPS_CONTEXT: ${{ toJson(steps) }}
+      #     STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+      #   run: |
+      #     echo -e "\033[33;1;4mDump environment vars\033[0m"
+      #     echo -e "$(env|sort)\n"
 
-          echo -e "\033[33;1;4mDump github context\033[0m"
-          echo -e "$GITHUB_CONTEXT\n"
+      #     echo -e "\033[33;1;4mDump github context\033[0m"
+      #     echo -e "$GITHUB_CONTEXT\n"
 
-          echo -e "\033[33;1;4mDump job context\033[0m"
-          echo -e "$JOB_CONTEXT\n"
+      #     echo -e "\033[33;1;4mDump job context\033[0m"
+      #     echo -e "$JOB_CONTEXT\n"
 
-          echo -e "\033[33;1;4mDump steps context\033[0m"
-          echo -e "$STEPS_CONTEXT\n"
+      #     echo -e "\033[33;1;4mDump steps context\033[0m"
+      #     echo -e "$STEPS_CONTEXT\n"
 
-          echo -e "\033[33;1;4mDump matrix context\033[0m"
-          echo -e "$MATRIX_CONTEXT\n"
+      #     echo -e "\033[33;1;4mDump matrix context\033[0m"
+      #     echo -e "$MATRIX_CONTEXT\n"
 
-          echo -e "\033[33;1;4mDump runner context\033[0m"
-          echo -e "$RUNNER_CONTEXT\n"
+      #     echo -e "\033[33;1;4mDump runner context\033[0m"
+      #     echo -e "$RUNNER_CONTEXT\n"
 
-          echo -e "\033[33;1;4mDump strategy context\033[0m"
-          echo -e "$STRATEGY_CONTEXT\n"
+      #     echo -e "\033[33;1;4mDump strategy context\033[0m"
+      #     echo -e "$STRATEGY_CONTEXT\n"
         
-      - uses: actions/github-script@v7
-        name: Dump context
-        with:
-          script: |
-            console.log(JSON.stringify(context))
+      # - uses: actions/github-script@v7
+      #   name: Dump context
+      #   with:
+      #     script: |
+      #       console.log(JSON.stringify(context))
 
       - id: find-run # ID used to ref outputs later
         name: Find run
@@ -67,12 +67,31 @@ jobs:
             if (runs.data.workflow_runs.length === 0) {
               throw new Error('No successful runs found for on-pr-open workflow');
             }
-            console.log(`Last successful run: ${runs.data.workflow_runs[0].id}`);
+            console.log(`Last successful run id: ${runs.data.workflow_runs[0].id}`);
             return runs.data.workflow_runs[0].id;
 
-      - name: Download last dist artifact
+      - name: Download naive
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
+          run-id: ${{ steps.find-run.outputs.run_id }}
+          name: dist
+          path: ./dist
+
+      - name: Download with token
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ steps.find-run.outputs.run_id }}
+          name: dist
+          path: ./dist
+
+      - name: Download with token and repo
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          repository: ${{ github.repository }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ steps.find-run.outputs.run_id }}
           name: dist

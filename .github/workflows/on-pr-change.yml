@@ -1,5 +1,5 @@
-name: On PR Open
-run-name: on-pr-open
+name: On PR Change
+run-name: on-pr-change
 
 # Runs on every change in a pull request, even draft requests
 on:
