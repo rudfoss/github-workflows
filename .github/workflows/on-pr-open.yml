@@ -4,6 +4,8 @@ run-name: on-pr-open
 # Runs on every change in a pull request, even draft requests
 on:
   pull_request:
+    branches: # Trigger only if the PR targets main (remove these two lines to trigger on all PRs)
+      - main
 
 # Cancel any existing runs if new code is pushed to avoid multiple simultaneous instances
 concurrency:
