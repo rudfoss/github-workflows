@@ -23,7 +23,7 @@ jobs:
           RUNNER_CONTEXT: ${{ toJson(runner) }}
           STEPS_CONTEXT: ${{ toJson(steps) }}
           STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-          FULL_CONTEXT: ${{ toJson(context) }}
+          PAYLOAD_CONTEXT: ${{ toJson(payload) }}
         run: |
           echo -e "\033[33;1;4mDump environment vars\033[0m"
           echo -e "$(env|sort)\n"
@@ -46,8 +46,8 @@ jobs:
           echo -e "\033[33;1;4mDump strategy context\033[0m"
           echo -e "$STRATEGY_CONTEXT\n"
 
-          echo -e "\033[33;1;4mDump full context\033[0m"
-          echo -e "$FULL_CONTEXT\n"
+          echo -e "\033[33;1;4mDump payload context\033[0m"
+          echo -e "$PAYLOAD_CONTEXT\n"
 
       - id: find-run # ID used to ref outputs later
         uses: actions/github-script@v6
