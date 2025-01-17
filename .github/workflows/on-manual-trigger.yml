@@ -73,6 +73,7 @@ jobs:
       - name: Download last dist artifact
         uses: actions/download-artifact@v4
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ steps.find-run.outputs.run_id }}
           name: dist
           path: ./dist
