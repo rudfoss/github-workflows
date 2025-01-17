@@ -118,7 +118,17 @@ jobs:
         run: 7z x dist.zip -o./dist
 
       - name: List content
-        run: ls -al ./
+        run: ls -alR ./
       
       - name: Dump ping file
         run: cat dist/pingfile.txt
+
+      - name: Run if project-2 is present
+        if: ${{ hashFiles('dist/project-2') != '' }}
+        run: |
+          echo "Project-2 is present"
+
+      - name: Run if project-3 is present
+        if: ${{ hashFiles('dist/project-3') != '' }}
+        run: |
+          echo "Project-3 is present"

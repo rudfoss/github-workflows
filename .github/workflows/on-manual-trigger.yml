@@ -111,7 +111,7 @@ jobs:
         run: 7z x dist.zip -o./dist
 
       - name: List content
-        run: ls -al ./
+        run: ls -alR ./
       
       - name: Dump ping file
         run: cat dist/pingfile.txt
