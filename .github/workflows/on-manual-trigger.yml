@@ -1,5 +1,5 @@
 name: On Manual
-run-name: on-manual
+run-name: on-manual-${{ github.head_ref }}
 
 # Runs on every change in a pull request, even draft requests
 on:
