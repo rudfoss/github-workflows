@@ -89,7 +89,7 @@ jobs:
 
             const artifact = allArtifacts.data.artifacts.find((x) => x.name === "dist")
 
-            let data = {
+            data = {
               owner: context.repo.owner,
               repo: context.repo.repo,
               artifact_id: artifact.id,
@@ -98,7 +98,7 @@ jobs:
             console.log({data})
             const download = await github.rest.actions.downloadArtifact(data);
             
-            let fs = require('fs');
+            const fs = require('fs');
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/dist.zip`, Buffer.from(download.data));
 
       - name: Download naive
