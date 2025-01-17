@@ -1,5 +1,5 @@
 name: On Manual
-run-name: on-manual-${{ github.head_ref }}
+run-name: on-manual-${{ github.head_ref || github.ref_name }}
 
 # Runs on every change in a pull request, even draft requests
 on:
@@ -60,7 +60,7 @@ jobs:
           script: |
             const workflowId = process.env.WORKFLOW_ID
             const artifactName = process.env.ARTIFACT_NAME
-            const branch = context.head_ref
+            const branch = context.head_ref ?? context.ref_name
             console.log({workflowId, artifactName, branch})
             
             const runs = await github.rest.actions.listWorkflowRuns({
