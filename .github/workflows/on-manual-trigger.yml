@@ -1,5 +1,5 @@
 name: On Manual
-run-name: on-manual
+run-name: on-manual-${{ github.head_ref || github.ref_name }}
 
 # Runs on every change in a pull request, even draft requests
 on:
@@ -50,10 +50,9 @@ jobs:
         with:
           script: |
             console.log(JSON.stringify(context))
-
+  
       - name: Download manually
         uses: actions/github-script@v7
-        continue-on-error: true
         env:
           WORKFLOW_ID: "on-pr-change.yml"
           ARTIFACT_NAME: "dist"
@@ -61,13 +60,18 @@ jobs:
           script: |
             const workflowId = process.env.WORKFLOW_ID
             const artifactName = process.env.ARTIFACT_NAME
-            console.log({workflowId, artifactName})
+            const branchName = context.head_ref || context.ref_name
 
+            console.log({workflowId, artifactName, branchName})
+            if (!workflowId || !artifactName || !branchName) {
+              throw new Error('workflowId, artifactName or branchName not defined');
+            }
+            
             const runs = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: workflowId,
-              branch: context.ref.replace("refs/heads/", ""),
+              branch: branchName,
               status: 'success',
               per_page: 1
             });
@@ -85,8 +89,7 @@ jobs:
             }
             console.log({data})
             const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts(data);
-
-            console.log(JSON.stringify(allArtifacts))
+            console.log(JSON.stringify({allArtifacts}))
 
             const artifact = allArtifacts.data.artifacts.find((x) => x.name === artifactName)
 
@@ -101,7 +104,7 @@ jobs:
             
             const fs = require('fs');
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/${artifactName}.zip`, Buffer.from(download.data));
-
+     
       - name: Extract artifact
         run: 7z x dist.zip -o./dist
 

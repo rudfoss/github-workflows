@@ -1,8 +1,10 @@
-name: On PR Merge
-run-name: on-pr-merge-${{ github.head_ref }}
+name: On PR Close
+run-name: on-pr-close-${{ github.head_ref || github.ref_name }}
+# head_ref works when triggered by PR, ref_name works when triggered manually
 
-# Runs on every change in a pull request, even draft requests
+# Runs when any pr is closed and merged to main as well as manually triggered if needed
 on:
+  workflow_dispatch:
   pull_request:
     types: [closed]
     branches: # Trigger only if the PR targets main (remove these two lines to trigger on all PRs)
@@ -15,6 +17,7 @@ concurrency:
 
 jobs:
   deploy:
+    # Only run if merged
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
@@ -57,7 +60,6 @@ jobs:
 
       - name: Download manually
         uses: actions/github-script@v7
-        continue-on-error: true
         env:
           WORKFLOW_ID: "on-pr-change.yml"
           ARTIFACT_NAME: "dist"
@@ -65,13 +67,18 @@ jobs:
           script: |
             const workflowId = process.env.WORKFLOW_ID
             const artifactName = process.env.ARTIFACT_NAME
-            console.log({workflowId, artifactName})
+            const branchName = context.head_ref
+            
+            console.log({workflowId, artifactName, branchName})
+            if (!workflowId || !artifactName || !branchName) {
+              throw new Error('workflowId, artifactName or branchName not defined');
+            }
             
             const runs = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: workflowId,
-              branch: context.ref.replace("refs/heads/", ""),
+              branch: branchName,
               status: 'success',
               per_page: 1
             });
@@ -89,8 +96,7 @@ jobs:
             }
             console.log({data})
             const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts(data);
-
-            console.log(JSON.stringify(allArtifacts))
+            console.log(JSON.stringify({allArtifacts}))
 
             const artifact = allArtifacts.data.artifacts.find((x) => x.name === artifactName)
 
