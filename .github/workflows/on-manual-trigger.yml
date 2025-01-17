@@ -44,7 +44,12 @@ jobs:
 
           echo -e "\033[33;1;4mDump strategy context\033[0m"
           echo -e "$STRATEGY_CONTEXT\n"
-          
+        
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            console.log(JSON.stringify(context))
+
       - id: find-run # ID used to ref outputs later
         uses: actions/github-script@v6
         with:
