@@ -4,6 +4,7 @@ run-name: on-pr-close-${{ github.head_ref || github.ref_name }}
 
 # Runs when any pr is closed and merged to main
 on:
+  workflow_dispatch:
   pull_request:
     types: [closed]
     branches: # Trigger only if the PR targets main (remove these two lines to trigger on all PRs)
