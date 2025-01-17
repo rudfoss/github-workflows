@@ -46,11 +46,13 @@ jobs:
           echo -e "$STRATEGY_CONTEXT\n"
         
       - uses: actions/github-script@v6
+        name: Dump context
         with:
           script: |
             console.log(JSON.stringify(context))
 
       - id: find-run # ID used to ref outputs later
+        name: Find run
         uses: actions/github-script@v6
         with:
           script: |
