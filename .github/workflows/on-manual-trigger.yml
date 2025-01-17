@@ -60,7 +60,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'on-pr-open.yml',
-              branch: context.payload.ref,
+              branch: context.ref.replace("refs/heads/", ""),
               status: 'success',
               per_page: 1
             });
