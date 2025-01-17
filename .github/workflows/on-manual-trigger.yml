@@ -51,41 +51,30 @@ jobs:
       #     script: |
       #       console.log(JSON.stringify(context))
 
-      - id: find-run # ID used to ref outputs later
-        name: Find run
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const runs = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'on-pr-change.yml',
-              branch: context.ref.replace("refs/heads/", ""),
-              status: 'success',
-              per_page: 1
-            });
-            if (runs.data.workflow_runs.length === 0) {
-              throw new Error('No successful runs found for on-pr-change workflow');
-            }
-            console.log(`Last successful run id: ${runs.data.workflow_runs[0].id}`);
-            return runs.data.workflow_runs[0].id;
-
       - name: Download manually
         uses: actions/github-script@v7
         continue-on-error: true
+        env:
+          WORKFLOW_ID: "on-pr-change.yml"
+          ARTIFACT_NAME: "dist"
         with:
           script: |
+            const workflowId = process.env.WORKFLOW_ID
+            const artifactName = process.env.ARTIFACT_NAME
+
+            console.log({env: JSON.stringify(process.env), workflowId, artifactName})
             const runs = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'on-pr-change.yml',
+              workflow_id: workflowId,
               branch: context.ref.replace("refs/heads/", ""),
               status: 'success',
               per_page: 1
             });
             if (runs.data.workflow_runs.length === 0) {
-              throw new Error('No successful runs found for on-pr-change workflow');
+              throw new Error(`No successful runs found for ${workflowId} workflow`);
             }
+
             console.log(`Last successful run id: ${runs.data.workflow_runs[0].id}`);
             const runId = runs.data.workflow_runs[0].id;
             
@@ -99,7 +88,7 @@ jobs:
 
             console.log(JSON.stringify(allArtifacts))
 
-            const artifact = allArtifacts.data.artifacts.find((x) => x.name === "dist")
+            const artifact = allArtifacts.data.artifacts.find((x) => x.name === artifactName)
 
             data = {
               owner: context.repo.owner,
@@ -111,34 +100,10 @@ jobs:
             const download = await github.rest.actions.downloadArtifact(data);
             
             const fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/dist.zip`, Buffer.from(download.data));
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/${artifactName}.zip`, Buffer.from(download.data));
 
-      - name: Download naive
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          run-id: ${{ steps.find-run.outputs.run_id }}
-          name: dist
-          path: ./dist
-
-      - name: Download with token
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ steps.find-run.outputs.run_id }}
-          name: dist
-          path: ./dist
-
-      - name: Download with token and repo
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          repository: ${{ github.repository }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ steps.find-run.outputs.run_id }}
-          name: dist
-          path: ./dist
+      - name: Extract artifact
+        run: 7z x dist.zip ./
 
       - name: List content
         run: ls -al ./
