@@ -70,6 +70,30 @@ jobs:
             console.log(`Last successful run id: ${runs.data.workflow_runs[0].id}`);
             return runs.data.workflow_runs[0].id;
 
+      - name: Download manually
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{ steps.find-run.outputs.run_id }},
+            });
+
+            console.log(JSON.stringify(allArtifacts))
+
+            const artifact = allArtifacts.data.artifacts.find((x) => x.name === "dist")
+
+            const download = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: artifact.id,
+              archive_format: 'zip',
+            });
+            
+            let fs = require('fs');
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/dist.zip`, Buffer.from(download.data));
+
       - name: Download naive
         uses: actions/download-artifact@v4
         continue-on-error: true
