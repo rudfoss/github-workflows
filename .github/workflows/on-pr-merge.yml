@@ -1,5 +1,5 @@
 name: On PR Merge
-run-name: on-pr-merge-${{ github.ref_name }}
+run-name: on-pr-merge-${{ github.head_ref }}
 
 # Runs on every change in a pull request, even draft requests
 on:
@@ -54,7 +54,7 @@ jobs:
         with:
           script: |
             console.log(JSON.stringify(context))
-            
+
       - name: Download manually
         uses: actions/github-script@v7
         continue-on-error: true

@@ -1,5 +1,5 @@
 name: On PR Change
-run-name: on-pr-change-${{ github.ref_name }}
+run-name: on-pr-change-${{ github.head_ref }}
 
 # Runs on every change in a pull request, even draft requests
 on:
@@ -52,7 +52,7 @@ jobs:
         with:
           script: |
             console.log(JSON.stringify(context))
-            
+
       - name: Check out code
         uses: actions/checkout@v4
         with:
