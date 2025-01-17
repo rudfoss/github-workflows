@@ -18,14 +18,33 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
+      - id: find-run
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'on-pr-open.yml',
+              branch: context.payload.pull_request.head.ref,
+              status: 'success',
+              per_page: 1
+            });
+            if (runs.data.workflow_runs.length === 0) {
+              throw new Error('No successful runs found for on-pr-open workflow');
+            }
+            return runs.data.workflow_runs[0].id;
+
       - name: Download last dist artifact
         uses: actions/download-artifact@v4
         with:
+          workflow: on-pr-open.yml
+          run-id: ${{ steps.find-run.outputs.run_id }}
           name: dist
           path: dist
 
       - name: List content
-        run: ls -al dist
+        run: ls -al ./
       
       - name: Dump ping file
         run: cat dist/pingfile.txt
