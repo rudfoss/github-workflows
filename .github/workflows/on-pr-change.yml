@@ -16,6 +16,43 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Dump all context
+        shell: bash
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          JOB_CONTEXT: ${{ toJson(job) }}
+          # MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+          # STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: |
+          echo -e "\033[33;1;4mDump environment vars\033[0m"
+          echo -e "$(env|sort)\n"
+
+          echo -e "\033[33;1;4mDump github context\033[0m"
+          echo -e "$GITHUB_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump job context\033[0m"
+          echo -e "$JOB_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump steps context\033[0m"
+          echo -e "$STEPS_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump matrix context\033[0m"
+          echo -e "$MATRIX_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump runner context\033[0m"
+          echo -e "$RUNNER_CONTEXT\n"
+
+          echo -e "\033[33;1;4mDump strategy context\033[0m"
+          echo -e "$STRATEGY_CONTEXT\n"
+        
+      - uses: actions/github-script@v7
+        name: Dump context
+        with:
+          script: |
+            console.log(JSON.stringify(context))
+            
       - name: Check out code
         uses: actions/checkout@v4
         with:
