@@ -2,7 +2,7 @@ name: On PR Close
 run-name: on-pr-close-${{ github.head_ref || github.ref_name }}
 # head_ref works when triggered by PR, ref_name works when triggered manually
 
-# Runs when any pr is closed and merged to main as well as manually triggered if needed
+# Runs when any pr is closed and merged to main
 on:
   workflow_dispatch:
   pull_request:
@@ -18,7 +18,7 @@ concurrency:
 jobs:
   deploy:
     # Only run if merged
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Dump all context
@@ -67,7 +67,9 @@ jobs:
           script: |
             const workflowId = process.env.WORKFLOW_ID
             const artifactName = process.env.ARTIFACT_NAME
-            const branchName = context.head_ref ?? context.payload?.pull_request?.head?.ref 
+            const branchName = context.head_ref ??
+              context.payload?.pull_request?.head?.ref ??
+              context.ref?.replace("refs/heads/", "")
             
             console.log({workflowId, artifactName, branchName})
             if (!workflowId || !artifactName || !branchName) {
@@ -116,7 +118,17 @@ jobs:
         run: 7z x dist.zip -o./dist
 
       - name: List content
-        run: ls -al ./
+        run: ls -alR ./
       
       - name: Dump ping file
         run: cat dist/pingfile.txt
+
+      - name: Run if project-2 is present
+        if: ${{ hashFiles('dist/project-2') != '' }}
+        run: |
+          echo "Project-2 is present"
+
+      - name: Run if project-3 is present
+        if: ${{ hashFiles('dist/project-3') != '' }}
+        run: |
+          echo "Project-3 is present"

@@ -60,7 +60,9 @@ jobs:
           script: |
             const workflowId = process.env.WORKFLOW_ID
             const artifactName = process.env.ARTIFACT_NAME
-            const branchName = context.head_ref ?? context.payload?.pull_request?.ref
+            const branchName = context.head_ref ??
+              context.payload?.pull_request?.head?.ref ??
+              context.ref?.replace("refs/heads/", "")
 
             console.log({workflowId, artifactName, branchName})
             if (!workflowId || !artifactName || !branchName) {
@@ -109,7 +111,17 @@ jobs:
         run: 7z x dist.zip -o./dist
 
       - name: List content
-        run: ls -al ./
+        run: ls -alR ./
       
       - name: Dump ping file
         run: cat dist/pingfile.txt
+
+      - name: Run if project-2 is present
+        if: ${{ hashFiles('dist/project-2') != '' }}
+        run: |
+          echo "Project-2 is present"
+
+      - name: Run if project-3 is present
+        if: ${{ hashFiles('dist/project-3') != '' }}
+        run: |
+          echo "Project-3 is present"
