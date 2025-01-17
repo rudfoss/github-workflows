@@ -16,6 +16,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Event_name
+        run: echo '${{ github.event_name }}'
   deploy:
     # Only run if merged
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
