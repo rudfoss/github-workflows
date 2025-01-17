@@ -60,7 +60,9 @@ jobs:
           script: |
             const workflowId = process.env.WORKFLOW_ID
             const artifactName = process.env.ARTIFACT_NAME
-            const branchName = context.head_ref ?? context.payload?.pull_request?.ref
+            const branchName = context.head_ref ??
+              context.payload?.pull_request?.head?.ref ??
+              context.ref?.replace("refs/heads/", "")
 
             console.log({workflowId, artifactName, branchName})
             if (!workflowId || !artifactName || !branchName) {
