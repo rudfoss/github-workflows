@@ -28,7 +28,7 @@ jobs:
       - name: Install deps
         run: npm i
 
-      - name: Setup environment
+      - name: Load environment variables
         uses: ./actions/setEnv
         with:
           envFile: .env

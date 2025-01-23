@@ -26,7 +26,7 @@ const start = async () => {
     }
 
     console.log(`${exists ? "REPLACE" : "SET"}: ${name}`)
-    await exec.exec(`echo ""${name}=${value}"" >> $GITHUB_ENV`)
+    core.setSecret(name, value)
   }
 }
 
