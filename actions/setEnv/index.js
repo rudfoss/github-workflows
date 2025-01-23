@@ -7,7 +7,6 @@ const dotenv = require("dotenv")
 const readAndParseEnv = (envFilePath) => {
   if (!fs.existsSync(envFilePath)) throw new Error(`Env file ${envFilePath} does not exist`)
   const envFile = fs.readFileSync(envFilePath, "utf8")
-  console.log("Read file", envFile)
   return dotenv.parse(envFile)
 }
 
@@ -27,7 +26,7 @@ const start = async () => {
     }
 
     console.log(`${exists ? "REPLACE" : "SET"}: ${name}`)
-    await exec.exec(`echo "${name}=${value}" >> $GITHUB_ENV`)
+    await exec.exec(`echo ""${name}=${value}"" >> $GITHUB_ENV`)
   }
 }
 
