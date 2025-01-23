@@ -31,10 +31,7 @@ jobs:
           invalue: Hello world
 
       - name: Read env
-        with:
-          FOO: ${{ env.REPLACE_MY_VALUE }}
         run: |
-          echo "FOO: $FOO"
           echo "REPLACE_MY_VALUE: $REPLACE_MY_VALUE"
 
       # Publish the dist folder so that it can be picked up by another job
