@@ -20,6 +20,7 @@ const start = async () => {
     console.log("settings", {envFile, replace, secret})
 
     const env = readAndParseEnv(envFile)
+    console.log("found variables", Object.keys(env))
     for (const [name, value] of Object.entries(env)) {
       const exists = !!process.env[name]
       if (exists && !replace) {
