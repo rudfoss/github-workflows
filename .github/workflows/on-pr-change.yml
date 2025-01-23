@@ -35,7 +35,7 @@ jobs:
 
       - name: Update ENV
         run: |
-          echo "REPLACE_MY_VALUE=I was set from the workflow"
+          echo "REPLACE_MY_VALUE=I was set from the workflow" >> "$GITHUB_ENV"
 
       - name: Custom action
         uses: ./actions/logwith
