@@ -28,6 +28,11 @@ jobs:
       - name: Install deps
         run: npm i
 
+      - name: Setup environment
+        uses: ./actions/setEnv
+        with:
+          envFile: .env
+
       - name: Custom action
         uses: ./actions/logwith
         with:

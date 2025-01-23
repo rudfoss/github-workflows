@@ -1,0 +1,15 @@
+name: 'Set from .env file'
+description: 'Set all environment variables defined in a .env file on the local environment'
+inputs:
+  envFile:  # id of input
+    description: 'The path to the .env file to use'
+    required: true
+  replace:
+    description: 'Replace variables that already have values (default: true)'
+    default: 'true'
+  secret:
+    description: 'Set values as secrets that are not logged (default: false). Secrets should NOT be commited to the repo as .env files'
+    default: 'false'
+runs:
+  using: 'node20'
+  main: 'index.js'
