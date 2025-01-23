@@ -1,0 +1,13 @@
+name: 'Log with'
+description: 'Log the value of an input'
+inputs:
+  invalue:  # id of input
+    description: 'What to log'
+    required: true
+    default: 'World'
+outputs:
+  outvalue: # id of output
+    description: 'What was logged'
+runs:
+  using: 'node22'
+  main: 'index.js'
