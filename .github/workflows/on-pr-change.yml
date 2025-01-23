@@ -14,7 +14,7 @@ concurrency:
 
 env:
   REF_BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  REPLACE_MY_VALUE: i-was-not-replaced
+  REPLACE_MY_VALUE: i-was-not-set
 
 jobs:
   build:
@@ -33,16 +33,27 @@ jobs:
         with:
           envFile: .env
 
-      - name: Custom action
+      - name: Test
+        run: |
+          echo "Env ${{ env.REPLACE_MY_VALUE }}"
+          echo "Secret ${{ secrets.REPLACE_MY_VALUE }}"
+
+      - name: Log env value
         uses: ./actions/logwith
         with:
           invalue: ${{ env.REPLACE_MY_VALUE }}
 
-      - name: Update ENV
+      - name: Set explicitly
         run: |
           echo "REPLACE_MY_VALUE=I was set from the workflow" >> "$GITHUB_ENV"
 
-      - name: Custom action
+
+      - name: Test
+        run: |
+          echo "Env ${{ env.REPLACE_MY_VALUE }}"
+          echo "Secret ${{ secrets.REPLACE_MY_VALUE }}"
+          
+      - name: Log env value
         uses: ./actions/logwith
         with:
           invalue: ${{ env.REPLACE_MY_VALUE }}
