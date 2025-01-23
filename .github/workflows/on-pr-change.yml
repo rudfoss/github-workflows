@@ -25,6 +25,9 @@ jobs:
         with:
           fetch-depth: 0 # Required for Nx affected runs (not in use in this repo, but kept for completeness)
 
+      - name: Install deps
+        run: npm i
+
       - name: Custom action
         uses: ./actions/logwith
         with:
