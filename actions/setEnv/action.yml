@@ -7,9 +7,6 @@ inputs:
   replace:
     description: 'Replace variables that already have values (default: true)'
     default: 'true'
-  secret:
-    description: 'Set values as secrets that are not logged (default: false). Secrets should NOT be commited to the repo as .env files'
-    default: 'false'
 runs:
   using: 'node20'
-  main: 'index.js'
+  main: 'loadEnv.js'
