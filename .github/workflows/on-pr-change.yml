@@ -31,7 +31,16 @@ jobs:
       - name: Custom action
         uses: ./actions/logwith
         with:
-          invalue: Hello world
+          invalue: ${{ env.REPLACE_MY_VALUE }}
+
+      - name: Update ENV
+        run: |
+          echo "REPLACE_MY_VALUE=I was set from the workflow"
+
+      - name: Custom action
+        uses: ./actions/logwith
+        with:
+          invalue: ${{ env.REPLACE_MY_VALUE }}
 
       - name: Read env
         run: |
