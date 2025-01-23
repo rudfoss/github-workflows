@@ -27,6 +27,7 @@ const start = async () => {
 
     console.log(`${exists ? "REPLACE" : "SET"}: ${name}`)
     core.setSecret(name, value)
+    core.exportVariable(name, value)
   }
 }
 
