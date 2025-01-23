@@ -10,27 +10,31 @@ const readAndParseEnv = async (envFilePath) => {
   return dotenv.parse(envFile)
 }
 
-try {
-  const envFile = core.getInput("envFile")
-  const replace = core.getInput("replace") === "true"
-  const secret = core.getInput("secret") === "true"
-  
-  console.log(`::group::Load env: ${envFile}${os.EOL}`)
-  console.log("settings", {envFile, replace, secret})
+const start = async () => {
+  try {
+    const envFile = core.getInput("envFile")
+    const replace = core.getInput("replace") === "true"
+    const secret = core.getInput("secret") === "true"
+    
+    console.log(`::group::Load env: ${envFile}${os.EOL}`)
+    console.log("settings", {envFile, replace, secret})
 
-  const env = readAndParseEnv(envFile)
-  for (const [name, value] of Object.entries(env)) {
-    const exists = !!process.env[name]
-    if (exists && !replace) {
-      console.log(`SKIP: ${name} (exists and !replace)`)
-      continue
+    const env = readAndParseEnv(envFile)
+    for (const [name, value] of Object.entries(env)) {
+      const exists = !!process.env[name]
+      if (exists && !replace) {
+        console.log(`SKIP: ${name} (exists and !replace)`)
+        continue
+      }
+
+      console.log(`${exists ? "REPLACE" : "SET"}: ${name}`)
+      await exec.exec(`echo "${name}=${value}" >> $GITHUB_ENV`)
     }
-
-    console.log(`${exists ? "REPLACE" : "SET"}: ${name}`)
-    await exec.exec(`echo "${name}=${value}" >> $GITHUB_ENV`)
+  } finally {
+    console.log(`${os.EOL}::endgroup::${os.EOL}`)
   }
-} catch (error) {
-  core.setFailed(error.message)
-} finally {
-  console.log(`${os.EOL}::endgroup::${os.EOL}`)
 }
+
+start().catch((error) => {
+  core.setFailed(error.message)
+})
