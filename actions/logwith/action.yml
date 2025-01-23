@@ -9,5 +9,5 @@ outputs:
   outvalue: # id of output
     description: 'What was logged'
 runs:
-  using: 'node22'
+  using: 'node20'
   main: 'index.js'
