@@ -25,9 +25,6 @@ jobs:
         with:
           fetch-depth: 0 # Required for Nx affected runs (not in use in this repo, but kept for completeness)
 
-      - name: Install deps
-        run: npm i
-
       - name: Load environment variables
         uses: ./actions/setEnv
         with:
@@ -38,25 +35,14 @@ jobs:
           echo "Env ${{ env.REPLACE_MY_VALUE }}"
           echo "Secret ${{ secrets.REPLACE_MY_VALUE }}"
 
-      - name: Log env value
-        uses: ./actions/logwith
-        with:
-          invalue: ${{ env.REPLACE_MY_VALUE }}
-
       - name: Set explicitly
         run: |
           echo "REPLACE_MY_VALUE=I was set from the workflow" >> "$GITHUB_ENV"
-
 
       - name: Test
         run: |
           echo "Env ${{ env.REPLACE_MY_VALUE }}"
           echo "Secret ${{ secrets.REPLACE_MY_VALUE }}"
-          
-      - name: Log env value
-        uses: ./actions/logwith
-        with:
-          invalue: ${{ env.REPLACE_MY_VALUE }}
 
       - name: Read env
         run: |
