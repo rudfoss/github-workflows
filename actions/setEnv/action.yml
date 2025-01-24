@@ -9,4 +9,4 @@ inputs:
     default: 'true'
 runs:
   using: 'node20'
-  main: 'loadEnv.mjs'
+  main: 'loadEnv.js'
