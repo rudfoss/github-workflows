@@ -1,0 +1,12 @@
+name: 'Set from .env file'
+description: 'Set all environment variables defined in a .env file on the local environment'
+inputs:
+  envFile:  # id of input
+    description: 'The path to the .env file to use'
+    required: true
+  replace:
+    description: 'Replace variables that already have values (default: true)'
+    default: 'true'
+runs:
+  using: 'node20'
+  main: 'loadEnv.js'
